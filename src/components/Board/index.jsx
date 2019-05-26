@@ -104,6 +104,14 @@ export default class Board extends Component {
     }
   };
 
+  randomize = () => {
+    let newBoard = [];
+
+    this.setState(prevState => ({
+      ...prevState,
+    }));
+  };
+
   componentDidUpdate = () => console.log(this.state);
 
   initializeBoard = (size = 10) => new Array(size).fill(new Array(size).fill(0));
