@@ -135,13 +135,17 @@ export default class Board extends Component {
       return Object.keys(pieces).map((key, i) => {
         const piece = pieces[key];
         return (
-          <Button
-            onClick={() => this.selectPiece(piece, key)}
-            style={{ height: 35 * piece.size }}
-            key={`piece-${i}`}
-            disabled={piece.quantity === 0}>
-            {piece.size}
-          </Button>
+          <>
+            <Button
+              className="mt-3"
+              onClick={() => this.selectPiece(piece, key)}
+              style={{ height: 35 * piece.size }}
+              key={`piece-${i}`}
+              disabled={piece.quantity === 0}>
+              {piece.size}
+            </Button>
+            <span className="mr-2 ml-1">x {piece.quantity}</span>
+          </>
         );
       });
     }
