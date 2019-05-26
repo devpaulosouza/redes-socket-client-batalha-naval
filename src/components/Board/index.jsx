@@ -24,15 +24,35 @@ export default class Board extends Component {
 
     this.state = {
       board: this.initializeBoard(),
+      boardSelected: undefined,
       selected: undefined,
       pieces,
     };
   }
 
-  onMouseOver = ({ target }) => {
+  onMouseOver = ({
+    target: {
+      dataset: { i, j },
+    },
+  }) => {
     const { selected } = this.state;
+    const { board } = this.state;
+    let newBoard = [];
     if (selected) {
-      console.log(target);
+      if (selected.vertical) {
+        for (let m = 0; m < board.length; m++) {
+          let array = [];
+          for (let n = 0; n < board.length; n++) {
+            array.push(m === parseInt(i) && n === parseInt(j) ? selected.size : board[i][j]);
+          }
+          newBoard.push(array);
+        }
+
+        this.setState(prevState => ({
+          ...prevState,
+          boardSelected: newBoard,
+        }));
+      }
     }
   };
 
@@ -41,7 +61,9 @@ export default class Board extends Component {
   initializeBoard = (size = 10) => new Array(size).fill(new Array(size).fill(0));
 
   selectPiece = (piece, key) => {
-    let { pieces } = this.state;
+    let { pieces, selected } = this.state;
+
+    if (selected) return;
 
     pieces[key].quantity = pieces[key].quantity - 1;
 
@@ -49,16 +71,25 @@ export default class Board extends Component {
       ...prevState,
       selected: piece,
       pieces,
+      boardSelected: prevState.board,
     }));
   };
 
   renderBoard = () => {
     const { id } = this.props;
-    const { board } = this.state;
-    return board.map((line, i) => (
+    const { board, boardSelected, selected } = this.state;
+
+    let currentBoard = selected ? boardSelected : board;
+
+    return currentBoard.map((line, i) => (
       <div className="row" key={`${id}-${i}`}>
         {line.map((button, j) => (
-          <Button key={`btn-${id}-${i}-${j}`} data-i={i} data-j={j} onMouseOver={this.onMouseOver}>
+          <Button
+            style={button > 0 ? { background: 'blue', color: 'white' } : {}}
+            key={`btn-${id}-${i}-${j}`}
+            data-i={i}
+            data-j={j}
+            onMouseOver={this.onMouseOver}>
             {button}
           </Button>
         ))}
