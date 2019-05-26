@@ -11,10 +11,10 @@ export default class Board extends Component {
     this.renderBoard = this.renderBoard.bind(this);
     this.renderPieces = this.renderPieces.bind(this);
 
-    const { renderPieces } = this.props;
+    const { playerOne } = this.props;
     let pieces = undefined;
 
-    if (renderPieces) {
+    if (playerOne) {
       pieces = {
         aircraftCarrier: { size: 5, quantity: 1, vertical: false },
         oilTanker: { size: 4, quantity: 2, vertical: true },
@@ -42,14 +42,18 @@ export default class Board extends Component {
   };
 
   onClick = () => {
-    this.setState(prevState => {
-      document.matriz = prevState.boardSelected;
-      return {
-        ...prevState,
-        board: prevState.boardSelected,
-        selected: undefined,
-      };
-    });
+    const { selected } = this.state;
+
+    if (selected) {
+      this.setState(prevState => {
+        document.matriz = prevState.boardSelected;
+        return {
+          ...prevState,
+          board: prevState.boardSelected,
+          selected: undefined,
+        };
+      });
+    }
   };
 
   onMouseOver = ({
@@ -120,7 +124,7 @@ export default class Board extends Component {
   };
 
   renderBoard = () => {
-    const { id } = this.props;
+    const { id, playerOne } = this.props;
     const { board, boardSelected, selected } = this.state;
 
     let currentBoard = selected ? boardSelected : board;
@@ -135,7 +139,7 @@ export default class Board extends Component {
             data-j={j}
             onMouseOver={this.onMouseOver}
             onClick={this.onClick}>
-            {button}
+            {playerOne && button}
           </Button>
         ))}
       </div>
@@ -143,11 +147,11 @@ export default class Board extends Component {
   };
 
   renderPieces = () => {
-    const { renderPieces } = this.props;
+    const { playerOne } = this.props;
 
     const { pieces } = this.state;
 
-    if (renderPieces) {
+    if (playerOne) {
       return (
         <>
           <Button className="mr-2" style={{ width: 90 }} onClick={this.rotacionar}>
