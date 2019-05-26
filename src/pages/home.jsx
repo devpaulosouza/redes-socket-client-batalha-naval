@@ -59,7 +59,7 @@ export default function Game() {
               className="form-control mb-2"
               placeholder="port"
               value={port}
-              onChange={e => setPort(e.target.port)}
+              onChange={e => setPort(e.target.value)}
             />
           </div>
           <div className="col-auto">
