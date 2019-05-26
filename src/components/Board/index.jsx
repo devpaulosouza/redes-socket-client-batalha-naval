@@ -15,7 +15,7 @@ export default class Board extends Component {
 
     if (renderPieces) {
       pieces = {
-        aircraftCarrier: { size: 5, quantity: 1, vertical: true },
+        aircraftCarrier: { size: 5, quantity: 1, vertical: false },
         oilTanker: { size: 4, quantity: 2, vertical: true },
         destroyer: { size: 3, quantity: 3, vertical: true },
         submarine: { size: 2, quantity: 4, vertical: true },
@@ -30,6 +30,14 @@ export default class Board extends Component {
     };
   }
 
+  onClick = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      board: prevState.boardSelected,
+      selected: undefined,
+    }));
+  };
+
   onMouseOver = ({
     target: {
       dataset: { i, j },
@@ -40,19 +48,39 @@ export default class Board extends Component {
     let newBoard = [];
     if (selected) {
       if (selected.vertical) {
+        if (parseInt(i) - selected.size < -1) return;
+
         for (let m = 0; m < board.length; m++) {
           let array = [];
           for (let n = 0; n < board.length; n++) {
-            array.push(m === parseInt(i) && n === parseInt(j) ? selected.size : board[i][j]);
+            array.push(
+              m > parseInt(i) - selected.size && m <= parseInt(i) && n === parseInt(j)
+                ? selected.size
+                : board[i][j],
+            );
           }
           newBoard.push(array);
         }
+      } else {
+        if (parseInt(j) - selected.size < -1) return;
 
-        this.setState(prevState => ({
-          ...prevState,
-          boardSelected: newBoard,
-        }));
+        for (let m = 0; m < board.length; m++) {
+          let array = [];
+          for (let n = 0; n < board.length; n++) {
+            array.push(
+              m === parseInt(i) && (n > parseInt(j) - selected.size && n <= parseInt(j))
+                ? selected.size
+                : board[i][j],
+            );
+          }
+          newBoard.push(array);
+        }
       }
+
+      this.setState(prevState => ({
+        ...prevState,
+        boardSelected: newBoard,
+      }));
     }
   };
 
@@ -89,7 +117,8 @@ export default class Board extends Component {
             key={`btn-${id}-${i}-${j}`}
             data-i={i}
             data-j={j}
-            onMouseOver={this.onMouseOver}>
+            onMouseOver={this.onMouseOver}
+            onClick={this.onClick}>
             {button}
           </Button>
         ))}
@@ -109,7 +138,8 @@ export default class Board extends Component {
           <Button
             onClick={() => this.selectPiece(piece, key)}
             style={{ height: 35 * piece.size }}
-            key={`piece-${i}`}>
+            key={`piece-${i}`}
+            disabled={piece.quantity === 0}>
             {piece.size}
           </Button>
         );

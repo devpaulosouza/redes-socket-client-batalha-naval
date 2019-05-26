@@ -7,7 +7,7 @@ export const Button = styled.button`
   color: palevioletred;
   width: 35px;
   height: 35px;
-  margin: 4px;
+  margin: 1px;
 `;
 
 export const Row = styled.div`
