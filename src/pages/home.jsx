@@ -7,7 +7,7 @@ export default function Home() {
       <h1 className="display-4 text-center">Batalha Naval</h1>
       <div className="row mt-4">
         <div className="col-md-6 text-center">
-          <Board id="board-1" />
+          <Board id="board-1" renderPieces />
         </div>
         <div className="col-md-6">
           <Board id="board-2" />
