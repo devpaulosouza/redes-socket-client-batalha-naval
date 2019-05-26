@@ -6,6 +6,7 @@ export default class Board extends Component {
   constructor(props) {
     super(props);
 
+    this.rotacionar = this.rotacionar.bind(this);
     this.initializeBoard = this.initializeBoard.bind(this);
     this.renderBoard = this.renderBoard.bind(this);
     this.renderPieces = this.renderPieces.bind(this);
@@ -30,12 +31,25 @@ export default class Board extends Component {
     };
   }
 
-  onClick = () => {
+  rotacionar = () => {
     this.setState(prevState => ({
       ...prevState,
-      board: prevState.boardSelected,
-      selected: undefined,
+      selected: {
+        ...prevState.selected,
+        vertical: !prevState.selected.vertical,
+      },
     }));
+  };
+
+  onClick = () => {
+    this.setState(prevState => {
+      document.matriz = prevState.boardSelected;
+      return {
+        ...prevState,
+        board: prevState.boardSelected,
+        selected: undefined,
+      };
+    });
   };
 
   onMouseOver = ({
@@ -53,11 +67,12 @@ export default class Board extends Component {
         for (let m = 0; m < board.length; m++) {
           let array = [];
           for (let n = 0; n < board.length; n++) {
-            array.push(
-              m > parseInt(i) - selected.size && m <= parseInt(i) && n === parseInt(j)
-                ? selected.size
-                : board[i][j],
-            );
+            const inRange =
+              m > parseInt(i) - selected.size && m <= parseInt(i) && n === parseInt(j);
+
+            if (inRange && board[m][n] !== 0) return;
+
+            array.push(inRange ? selected.size : board[m][n]);
           }
           newBoard.push(array);
         }
@@ -67,11 +82,12 @@ export default class Board extends Component {
         for (let m = 0; m < board.length; m++) {
           let array = [];
           for (let n = 0; n < board.length; n++) {
-            array.push(
-              m === parseInt(i) && (n > parseInt(j) - selected.size && n <= parseInt(j))
-                ? selected.size
-                : board[i][j],
-            );
+            const inRange =
+              m === parseInt(i) && (n > parseInt(j) - selected.size && n <= parseInt(j));
+
+            if (inRange && board[m][n] !== 0) return;
+
+            array.push(inRange ? selected.size : board[m][n]);
           }
           newBoard.push(array);
         }
@@ -132,22 +148,29 @@ export default class Board extends Component {
     const { pieces } = this.state;
 
     if (renderPieces) {
-      return Object.keys(pieces).map((key, i) => {
-        const piece = pieces[key];
-        return (
-          <>
-            <Button
-              className="mt-3"
-              onClick={() => this.selectPiece(piece, key)}
-              style={{ height: 35 * piece.size }}
-              key={`piece-${i}`}
-              disabled={piece.quantity === 0}>
-              {piece.size}
-            </Button>
-            <span className="mr-2 ml-1">x {piece.quantity}</span>
-          </>
-        );
-      });
+      return (
+        <>
+          <Button className="mr-2" style={{ width: 90 }} onClick={this.rotacionar}>
+            Rotacionar
+          </Button>
+          {Object.keys(pieces).map((key, i) => {
+            const piece = pieces[key];
+            return (
+              <>
+                <Button
+                  className="mt-3"
+                  onClick={() => this.selectPiece(piece, key)}
+                  style={{ height: 35 * piece.size }}
+                  key={`piece-${i}`}
+                  disabled={piece.quantity === 0}>
+                  {piece.size}
+                </Button>
+                <span className="mr-2 ml-1">x {piece.quantity}</span>
+              </>
+            );
+          })}
+        </>
+      );
     }
     return false;
   };
