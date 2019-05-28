@@ -7,11 +7,22 @@ export default function Game() {
   const [username, setUsername] = useState('');
   const [port, setPort] = useState('8484');
   const [ip, setIp] = useState('127.0.0.1');
+  const [connection, setConnection] = useState();
 
   const startGame = () => {
-    const conn = new Connection({ onStart: () => setGameState('playing') });
-    conn.connect(ip, port, () => conn.start(username));
+    connection.connect(ip, port, () => connection.start(username));
   };
+
+  const onStart = () => setGameState('playing');
+
+  const attack = (x, y) => connection.send(JSON.stringify({ action: 'attack', x, y }));
+
+  const onAttack = data => console.log(data);
+
+  if (!connection) {
+    const conn = new Connection({ onStart, attack, onAttack });
+    setConnection(conn);
+  }
 
   if (gameState === 'waiting') {
     return (
