@@ -159,9 +159,9 @@ export default class Board extends Component {
   };
 
   renderPieces = () => {
-    const { playerOne } = this.props;
+    const { playerOne, sendBoard } = this.props;
 
-    const { pieces } = this.state;
+    const { pieces, board } = this.state;
 
     if (playerOne) {
       return (
@@ -185,6 +185,7 @@ export default class Board extends Component {
               </>
             );
           })}
+          <button onClick={() => sendBoard(board)}>Começar</button>
         </>
       );
     }

@@ -21,6 +21,8 @@ export default function Game() {
 
   const onAttack = data => console.log(data);
 
+  const sendBoard = board => connection.send(JSON.stringify({ action: 'sendBoard', board }));
+
   if (!connection) {
     const conn = new Connection({ onWaitPlayerJoin, onStart, attack, onAttack });
     setConnection(conn);
@@ -97,7 +99,7 @@ export default function Game() {
       <h1 className="display-4 text-center">Batalha Naval</h1>
       <div className="row mt-4">
         <div className="col-md-6">
-          <Board id="board-1" playerOne />
+          <Board id="board-1" playerOne sendBoard={sendBoard} />
         </div>
         <div className="col-md-6">
           <Board id="board-2" />
