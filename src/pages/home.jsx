@@ -3,7 +3,7 @@ import { Board } from '../components';
 import { Connection } from '../api/Connection';
 
 export default function Game() {
-  const [gameState, setGameState] = useState('waiting');
+  const [gameState, setGameState] = useState('waitingConnection');
   const [username, setUsername] = useState('');
   const [port, setPort] = useState('8484');
   const [ip, setIp] = useState('127.0.0.1');
@@ -13,18 +13,20 @@ export default function Game() {
     connection.connect(ip, port, () => connection.start(username));
   };
 
-  const onStart = () => setGameState('playing');
+  const onStart = () => setGameState('startGame');
+
+  const onWaitPlayerJoin = () => setGameState('waitingOtherPlayer');
 
   const attack = (x, y) => connection.send(JSON.stringify({ action: 'attack', x, y }));
 
   const onAttack = data => console.log(data);
 
   if (!connection) {
-    const conn = new Connection({ onStart, attack, onAttack });
+    const conn = new Connection({ onWaitPlayerJoin, onStart, attack, onAttack });
     setConnection(conn);
   }
 
-  if (gameState === 'waiting') {
+  if (gameState === 'waitingConnection' || gameState === 'waitingOtherPlayer') {
     return (
       <div className="container mt-5">
         <div className="form-row align-items-center">
@@ -36,6 +38,7 @@ export default function Game() {
               type="text"
               className="form-control mb-2"
               placeholder="nickname"
+              disabled={gameState !== 'waitingConnection'}
               value={username}
               onChange={e => setUsername(e.target.value)}
             />
@@ -56,6 +59,7 @@ export default function Game() {
                 type="text"
                 className="form-control"
                 placeholder="ip"
+                disabled={gameState !== 'waitingConnection'}
                 value={ip}
                 onChange={e => setIp(e.target.value)}
               />
@@ -69,16 +73,21 @@ export default function Game() {
               type="text"
               className="form-control mb-2"
               placeholder="port"
+              disabled={gameState !== 'waitingConnection'}
               value={port}
               onChange={e => setPort(e.target.value)}
             />
           </div>
           <div className="col-auto">
-            <button className="btn btn-success mb-2" onClick={startGame}>
+            <button
+              className="btn btn-success mb-2"
+              disabled={gameState !== 'waitingConnection'}
+              onClick={startGame}>
               começar
             </button>
           </div>
         </div>
+        {gameState === 'waitingOtherPlayer' && <p>Aguardando outro jogador...</p>}
       </div>
     );
   }

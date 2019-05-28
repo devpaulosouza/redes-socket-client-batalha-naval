@@ -1,10 +1,11 @@
 const WebSocketClient = require('websocket').w3cwebsocket;
 
 export class Connection {
-  constructor({ onStart, onAttack, attack }) {
+  constructor({ onStart, onWaitPlayerJoin, onAttack, attack }) {
     this.onStart = onStart;
     this.onAttack = onAttack;
     this.attack = attack;
+    this.onWaitPlayerJoin = onWaitPlayerJoin;
   }
 
   async connect(ip, port, callback) {
@@ -16,6 +17,9 @@ export class Connection {
       const payload = await JSON.parse(e.data);
 
       switch (payload.action) {
+        case 'waitingOtherPlayer':
+          this.onWaitPlayerJoin();
+          break;
         case 'started':
           this.onStart();
           break;
@@ -38,6 +42,6 @@ export class Connection {
   }
 
   start(username) {
-    this.client.send(JSON.stringify({ action: 'start', username }));
+    this.client.send(JSON.stringify({ action: 'join', username }));
   }
 }

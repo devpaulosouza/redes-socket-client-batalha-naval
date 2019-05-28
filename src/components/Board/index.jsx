@@ -32,6 +32,10 @@ export default class Board extends Component {
   }
 
   rotacionar = () => {
+    const { selected } = this.state;
+
+    if (!selected) return;
+
     this.setState(prevState => ({
       ...prevState,
       selected: {
