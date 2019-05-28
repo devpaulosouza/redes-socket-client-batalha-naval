@@ -16,7 +16,7 @@ export default class Board extends Component {
 
     if (playerOne) {
       pieces = {
-        aircraftCarrier: { size: 5, quantity: 1, vertical: false },
+        aircraftCarrier: { size: 5, quantity: 1, vertical: true },
         oilTanker: { size: 4, quantity: 2, vertical: true },
         destroyer: { size: 3, quantity: 3, vertical: true },
         submarine: { size: 2, quantity: 4, vertical: true },
@@ -27,6 +27,7 @@ export default class Board extends Component {
       board: this.initializeBoard(),
       boardSelected: undefined,
       selected: undefined,
+      gameStatus: 'selecting',
       pieces,
     };
   }
@@ -116,8 +117,6 @@ export default class Board extends Component {
     }));
   };
 
-  componentDidUpdate = () => console.log(this.state);
-
   initializeBoard = (size = 10) => new Array(size).fill(new Array(size).fill(0));
 
   selectPiece = (piece, key) => {
@@ -161,12 +160,23 @@ export default class Board extends Component {
   renderPieces = () => {
     const { playerOne, sendBoard } = this.props;
 
-    const { pieces, board } = this.state;
+    const { pieces, board, gameStatus, selected } = this.state;
 
-    if (playerOne) {
+    if (gameStatus === 'waiting') {
+      return <p>Aguardando o outro jogador...</p>;
+    }
+
+    if (playerOne && gameStatus === 'selecting') {
       return (
         <>
-          <Button className="mr-2" style={{ width: 90 }} onClick={this.rotacionar}>
+          <Button
+            className="mr-2"
+            style={
+              selected && !selected.vertical
+                ? { background: 'blue', color: 'white', width: 90 }
+                : { width: 90 }
+            }
+            onClick={this.rotacionar}>
             Rotacionar
           </Button>
           {Object.keys(pieces).map((key, i) => {
@@ -174,18 +184,35 @@ export default class Board extends Component {
             return (
               <>
                 <Button
+                  disabled={piece.quantity === 0}
                   className="mt-3"
                   onClick={() => this.selectPiece(piece, key)}
-                  style={{ height: 35 * piece.size }}
-                  key={`piece-${i}`}
-                  disabled={piece.quantity === 0}>
+                  style={
+                    selected && piece.size === selected.size
+                      ? { background: 'blue', color: 'white', height: 35 * piece.size }
+                      : { height: 35 * piece.size }
+                  }
+                  key={`piece-${i}`}>
                   {piece.size}
                 </Button>
                 <span className="mr-2 ml-1">x {piece.quantity}</span>
               </>
             );
           })}
-          <button onClick={() => sendBoard(board)}>Começar</button>
+          <button
+            className="btn btn-success"
+            disabled={
+              Object.keys(pieces)
+                .map(key => pieces[`${key}`])
+                .map(p => p.quantity)
+                .reduce((a, quantidade) => quantidade + a, 0) !== 0 || selected
+            }
+            onClick={() => {
+              this.setState(prevState => ({ ...prevState, gameStatus: 'waiting' }));
+              sendBoard(board);
+            }}>
+            Começar
+          </button>
         </>
       );
     }
