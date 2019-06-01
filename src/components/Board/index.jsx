@@ -17,9 +17,9 @@ export default class Board extends Component {
     if (playerOne) {
       pieces = {
         aircraftCarrier: { size: 5, quantity: 1, vertical: true },
-        oilTanker: { size: 4, quantity: 2, vertical: true },
-        destroyer: { size: 3, quantity: 3, vertical: true },
-        submarine: { size: 2, quantity: 4, vertical: true },
+        oilTanker: { size: 4, quantity: 0, vertical: true },
+        destroyer: { size: 3, quantity: 0, vertical: true },
+        submarine: { size: 2, quantity: 0, vertical: true },
       };
     }
 
@@ -46,18 +46,30 @@ export default class Board extends Component {
     }));
   };
 
-  onClick = () => {
+  onClick = ({
+    target: {
+      dataset: { i, j },
+    },
+  }) => {
+    const { playerOne, turn, attack } = this.props;
     const { selected } = this.state;
 
-    if (selected) {
-      this.setState(prevState => {
-        document.matriz = prevState.boardSelected;
-        return {
-          ...prevState,
-          board: prevState.boardSelected,
-          selected: undefined,
-        };
-      });
+    // Se for a vez do jogador atacar e  click for no segundo tabuleiro
+    if (!playerOne && turn) {
+      attack(i, j);
+    }
+    // Se for na seleção dos barcos e o click for no primeiro tabuleiro
+    else {
+      if (selected) {
+        this.setState(prevState => {
+          document.matriz = prevState.boardSelected;
+          return {
+            ...prevState,
+            board: prevState.boardSelected,
+            selected: undefined,
+          };
+        });
+      }
     }
   };
 
@@ -135,7 +147,7 @@ export default class Board extends Component {
   };
 
   renderBoard = () => {
-    const { id, playerOne } = this.props;
+    const { id, playerOne, turn } = this.props;
     const { board, boardSelected, selected } = this.state;
 
     let currentBoard = selected ? boardSelected : board;
@@ -149,7 +161,8 @@ export default class Board extends Component {
             data-i={i}
             data-j={j}
             onMouseOver={this.onMouseOver}
-            onClick={this.onClick}>
+            onClick={this.onClick}
+            disabled={!playerOne && !turn}>
             {playerOne && button}
           </Button>
         ))}
