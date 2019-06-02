@@ -17,9 +17,9 @@ export default class Board extends Component {
     if (playerOne) {
       pieces = {
         aircraftCarrier: { size: 5, quantity: 1, vertical: true },
-        oilTanker: { size: 4, quantity: 0, vertical: true },
-        destroyer: { size: 3, quantity: 0, vertical: true },
-        submarine: { size: 2, quantity: 0, vertical: true },
+        oilTanker: { size: 4, quantity: 2, vertical: true },
+        destroyer: { size: 3, quantity: 3, vertical: true },
+        submarine: { size: 2, quantity: 4, vertical: true },
       };
     }
 
@@ -31,6 +31,24 @@ export default class Board extends Component {
       pieces,
     };
   }
+
+  componentDidUpdate = () => {
+    let { board } = this.state;
+    const { attackBoard, uuid } = this.props;
+    if (board && attackBoard && attackBoard.x) {
+      if (
+        attackBoard.uuid === uuid &&
+        board[attackBoard.x][attackBoard.y] !== parseInt(attackBoard.value)
+      ) {
+        board[attackBoard.x][attackBoard.y] = attackBoard.value;
+
+        this.setState(prevState => ({
+          ...prevState,
+          board,
+        }));
+      }
+    }
+  };
 
   rotacionar = () => {
     const { selected } = this.state;
@@ -129,7 +147,16 @@ export default class Board extends Component {
     }));
   };
 
-  initializeBoard = (size = 10) => new Array(size).fill(new Array(size).fill(0));
+  initializeBoard = (size = 10) => {
+    let board = Array(size);
+    for (let i = 0; i < size; i++) {
+      board[i] = Array(size);
+      for (let j = 0; j < size; j++) {
+        board[i][j] = 0;
+      }
+    }
+    return board;
+  };
 
   selectPiece = (piece, key) => {
     let { pieces, selected } = this.state;
@@ -156,14 +183,25 @@ export default class Board extends Component {
       <div className="row" key={`${id}-${i}`}>
         {line.map((button, j) => (
           <Button
-            style={button > 0 ? { background: 'blue', color: 'white' } : {}}
+            style={
+              button > 0
+                ? { background: 'blue', color: 'white' }
+                : button < 0 && button !== -999
+                ? { background: 'red', color: 'white', borderColor: 'black' }
+                : button === -999
+                ? { background: 'white', color: 'red', borderColor: 'red' }
+                : {}
+            }
             key={`btn-${id}-${i}-${j}`}
             data-i={i}
             data-j={j}
             onMouseOver={this.onMouseOver}
             onClick={this.onClick}
-            disabled={!playerOne && !turn}>
-            {playerOne && button}
+            disabled={(!playerOne && !turn) || button < 0}>
+            <>
+              {playerOne && button !== 0 && (button !== -999 ? Math.abs(button) : 0)}
+              {!playerOne && button < 0 && (button !== -999 ? Math.abs(button) : 0)}
+            </>
           </Button>
         ))}
       </div>

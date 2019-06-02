@@ -11,36 +11,38 @@ export default function Game() {
   const [uuid, setUuid] = useState('');
   const [otherPlayer, setOtherPlayer] = useState();
   const [turn, setTurn] = useState('');
+  const [attackBoard, setAttackBoard] = useState({ uuid: '', x: undefined, y: undefined });
 
   const startGame = () => {
     connection.connect(ip, port, () => connection.start(username));
   };
 
   const onStart = data => {
-    console.log(data);
     setUuid(data.uuid);
     setOtherPlayer(data.otherPlayer);
     setGameState('startGame');
   };
 
   const onWaitPlayerJoin = () => {
-    console.log('waiting');
     setGameState('waitingOtherPlayer');
   };
 
   const attack = (x, y) =>
     connection.send(JSON.stringify({ action: 'attack', x, y, uuid: otherPlayer.uuid }));
 
-  const onAttack = data => console.log(data);
+  const onAttack = data => setAttackBoard(data);
 
   const onAllPlayersReady = data => {
     setGameState('allPlayersReady');
-    console.log(data);
-    // setTurn()
   };
 
   const onTurnChange = data => {
     setTurn(data.turn);
+  };
+
+  const onFinished = data => {
+    setGameState('finished');
+    setTurn(data.winner);
   };
 
   const sendBoard = board => connection.send(JSON.stringify({ action: 'sendBoard', board }));
@@ -53,6 +55,7 @@ export default function Game() {
       onAttack,
       onAllPlayersReady,
       onTurnChange,
+      onFinished,
     });
     setConnection(conn);
   }
@@ -123,17 +126,40 @@ export default function Game() {
     );
   }
 
+  if (gameState === 'finished') {
+    return (
+      <div className="container">
+        <h1>{uuid === turn ? 'Você venceu! =]' : 'Você perdeu =/'}</h1>
+        <button className="btn btn-success" onClick={() => setGameState('waitingConnection')}>
+          Jogar novamente
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       <h1 className="display-4 text-center">Batalha Naval</h1>
       <div className="row mt-4">
         <div className="col-md-6">
           <h3>{username}</h3>
-          <Board id="board-1" uuid={uuid} playerOne sendBoard={sendBoard} />
+          <Board
+            attackBoard={attackBoard}
+            id="board-1"
+            uuid={uuid}
+            playerOne
+            sendBoard={sendBoard}
+          />
         </div>
         <div className="col-md-6">
           <h3>{otherPlayer.username}</h3>
-          <Board id="board-2" turn={turn === uuid} attack={attack} uuid={otherPlayer.uuid} />
+          <Board
+            attackBoard={attackBoard}
+            id="board-2"
+            turn={turn === uuid}
+            attack={attack}
+            uuid={otherPlayer.uuid}
+          />
           <h3>{turn === uuid && 'Sua vez...'}</h3>
         </div>
       </div>

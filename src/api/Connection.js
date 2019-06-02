@@ -1,13 +1,22 @@
 const WebSocketClient = require('websocket').w3cwebsocket;
 
 export class Connection {
-  constructor({ onStart, onWaitPlayerJoin, onAttack, attack, onAllPlayersReady, onTurnChange }) {
+  constructor({
+    onStart,
+    onWaitPlayerJoin,
+    onAttack,
+    attack,
+    onAllPlayersReady,
+    onTurnChange,
+    onFinished,
+  }) {
     this.onStart = onStart;
     this.onAttack = onAttack;
     this.attack = attack;
     this.onWaitPlayerJoin = onWaitPlayerJoin;
     this.onAllPlayersReady = onAllPlayersReady;
     this.onTurnChange = onTurnChange;
+    this.onFinished = onFinished;
   }
 
   async connect(ip, port, callback) {
@@ -18,12 +27,8 @@ export class Connection {
     this.client.onmessage = async e => {
       const payload = await JSON.parse(e.data);
 
-      console.log(payload);
-      console.log(payload.action);
-
       switch (payload.action) {
         case 'waitingOtherPlayer':
-          console.log('esperando');
           this.onWaitPlayerJoin();
           break;
         /* inicia a seleção dos barcos*/
@@ -39,8 +44,10 @@ export class Connection {
         case 'onAttack':
           this.onAttack(payload.data);
           break;
+        case 'finished':
+          this.onFinished(payload.data);
+          break;
         default:
-          console.log('não encontrou ação');
           break;
       }
     };
